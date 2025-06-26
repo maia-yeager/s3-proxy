@@ -1,67 +1,116 @@
-import { DurableObject } from "cloudflare:workers";
+import { AwsV4Signer } from "aws4fetch"
+import { drizzle } from "drizzle-orm/d1"
+import * as schema from "./db/schema"
 
-/**
- * Welcome to Cloudflare Workers! This is your first Durable Objects application.
- *
- * - Run `npm run dev` in your terminal to start a development server
- * - Open a browser tab at http://localhost:8787/ to see your Durable Object in action
- * - Run `npm run deploy` to publish your application
- *
- * Bind resources to your worker in `wrangler.jsonc`. After adding bindings, a type definition for the
- * `Env` object can be regenerated with `npm run cf-typegen`.
- *
- * Learn more at https://developers.cloudflare.com/durable-objects
- */
-
-
-/** A Durable Object's behavior is defined in an exported Javascript class */
-export class MyDurableObject extends DurableObject {
-	/**
-	 * The constructor is invoked once upon creation of the Durable Object, i.e. the first call to
-	 * 	`DurableObjectStub::get` for a given identifier (no-op constructors can be omitted)
-	 *
-	 * @param ctx - The interface for interacting with Durable Object state
-	 * @param env - The interface to reference bindings declared in wrangler.jsonc
-	 */
-	constructor(ctx: DurableObjectState, env: Env) {
-		super(ctx, env);
-	}
-
-	/**
-	 * The Durable Object exposes an RPC method sayHello which will be invoked when when a Durable
-	 *  Object instance receives a request from a Worker via the same method invocation on the stub
-	 *
-	 * @param name - The name provided to a Durable Object instance from a Worker
-	 * @returns The greeting to be sent back to the Worker
-	 */
-	async sayHello(name: string): Promise<string> {
-		return `Hello, ${name}!`;
-	}
-}
+const WORKER_HOSTNAME = "s3.yeagers.co"
 
 export default {
-	/**
-	 * This is the standard fetch handler for a Cloudflare Worker
-	 *
-	 * @param request - The request submitted to the Worker from the client
-	 * @param env - The interface to reference bindings declared in wrangler.jsonc
-	 * @param ctx - The execution context of the Worker
-	 * @returns The response to be sent back to the client
-	 */
-	async fetch(request, env, ctx): Promise<Response> {
-		// Create a `DurableObjectId` for an instance of the `MyDurableObject`
-		// class named "foo". Requests from all Workers to the instance named
-		// "foo" will go to a single globally unique Durable Object instance.
-		const id: DurableObjectId = env.MY_DURABLE_OBJECT.idFromName("foo");
+	async fetch(request: Request, env: Env, _ctx: ExecutionContext) {
+		const db = drizzle(env.DB, { schema })
 
-		// Create a stub to open a communication channel with the Durable
-		// Object instance.
-		const stub = env.MY_DURABLE_OBJECT.get(id);
+		// Get bucket name from request URL.
+		const requestUrl = new URL(request.url)
+		const bucketName = requestUrl.hostname.replace(`.${WORKER_HOSTNAME}`, "")
 
-		// Call the `sayHello()` RPC method on the stub to invoke the method on
-		// the remote Durable Object instance
-		const greeting = await stub.sayHello("world");
+		// Get info from database.
+		const bucket = await db.query.buckets.findFirst({
+			where: (t, { eq }) => eq(t.name, bucketName),
+			columns: {
+				endpoint: true,
+				name: true,
+				accessKeyId: true,
+				secretAccessKey: true,
+				region: true,
+			},
+		})
+		if (bucket === undefined) {
+			return new Response("Bucket not found", { status: 404 })
+		}
 
-		return new Response(greeting);
+		// Make sure there is an Authorization header
+		if (request.headers.get("authorization") === null) {
+			return new Response("Forbidden", { status: 403 })
+		}
+
+		// Generate a new signature and change URL
+		let s3Url: string | undefined
+		if (requestUrl.hostname === WORKER_HOSTNAME) {
+			s3Url = bucket.endpoint
+		} else if (requestUrl.hostname.startsWith(`${bucketName}.`)) {
+			s3Url = bucket.endpoint.replace(/^https?:\/\//, `https://${bucket.name}.`)
+			requestUrl.pathname = requestUrl.pathname.replace("worker/", "")
+			s3Url = s3Url.concat(requestUrl.pathname, requestUrl.search)
+		}
+
+		if (typeof s3Url !== "string") {
+			return new Response("Could not determine S3 URL", { status: 400 })
+		}
+		const s3Request = new Request(s3Url, request)
+
+		s3Request.headers.delete("accept-encoding")
+		s3Request.headers.delete("cf-connecting-ip")
+		s3Request.headers.delete("cf-ipcountry")
+		s3Request.headers.delete("cf-ray")
+		s3Request.headers.delete("cf-visitor")
+		s3Request.headers.delete("x-forwarded-proto")
+		s3Request.headers.delete("x-real-ip")
+
+		const sharedSignerConfig = {
+			// Required, akin to AWS_ACCESS_KEY_ID
+			accessKeyId: bucket.accessKeyId,
+			// Required, akin to AWS_SECRET_ACCESS_KEY
+			secretAccessKey: bucket.secretAccessKey,
+			// Akin to AWS_SESSION_TOKEN if using temp credentials
+			sessionToken: undefined,
+			// Standard JS object literal, or Headers instance
+			headers: s3Request.headers,
+			// Set to true to sign the query string instead of the Authorization header
+			signQuery: undefined,
+			// AWS service, parsed at fetch time by default
+			service: "s3",
+			// AWS region, parsed at fetch time by default
+			region: bucket.region,
+			// Credential cache, defaults to `new Map()`
+			cache: undefined,
+			// Set to true to add X-Amz-Security-Token after signing, defaults to true for iot
+			appendSessionToken: undefined,
+			// Set to true to force all headers to be signed instead of the defaults
+			allHeaders: undefined,
+			// Set to true to only encode %2F once (usually only needed for testing)
+			singleEncode: undefined,
+		} satisfies Partial<ConstructorParameters<typeof AwsV4Signer>[0]>
+
+		const origSigner = new AwsV4Signer({
+			...sharedSignerConfig,
+			// Required, the AWS endpoint to sign
+			url: requestUrl.toString(),
+			// If not supplied, will default to 'POST' if there's a body, otherwise 'GET'
+			method: request.method,
+			// Optional, String or ArrayBuffer/ArrayBufferView – ie, remember to stringify your JSON
+			body: request.body,
+			// Defaults to now
+			datetime: request.headers.get("x-amz-date") ?? undefined,
+		})
+
+		// Make sure the original request is signed correctly
+		if (
+			request.headers.get("authorization") !== (await origSigner.authHeader())
+		) {
+			return new Response("Invalid Authorization Signature", { status: 403 })
+		}
+
+		const signer = new AwsV4Signer({
+			...sharedSignerConfig,
+			url: s3Url,
+			method: s3Request.method,
+			body: s3Request.body,
+			datetime: s3Request.headers.get("x-amz-date") ?? undefined, // defaults to now. to override, use the form '20150830T123600Z'
+		})
+
+		const authHeader = await signer.authHeader()
+		console.log(authHeader)
+		s3Request.headers.set("Authorization", authHeader)
+
+		return fetch(s3Request)
 	},
-} satisfies ExportedHandler<Env>;
+}

@@ -7,25 +7,17 @@
 	"name": "s3-proxy",
 	"main": "src/index.ts",
 	"compatibility_date": "2025-06-20",
-	"migrations": [
-		{
-			"new_sqlite_classes": [
-				"MyDurableObject"
-			],
-			"tag": "v1"
-		}
-	],
 	"assets": {
 		"directory": "./public"
 	},
-	"durable_objects": {
-		"bindings": [
-			{
-				"class_name": "MyDurableObject",
-				"name": "MY_DURABLE_OBJECT"
-			}
-		]
-	},
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "s3-proxy-prod",
+			"database_id": "f7be42b9-8500-4ccd-99e6-5f14c1bcaa94",
+			"migrations_dir": "drizzle"
+		}
+	],
 	"observability": {
 		"enabled": true
 	}
