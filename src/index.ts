@@ -6,6 +6,9 @@ const WORKER_HOSTNAME = "s3.yeagers.co"
 
 export default {
 	async fetch(request: Request, env: Env, _ctx: ExecutionContext) {
+		for (const header of request.headers) {
+			console.log(header[0], header[1])
+		}
 		const db = drizzle(env.DB, { schema })
 
 		// Get bucket name from request URL.
