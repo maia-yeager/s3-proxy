@@ -48,6 +48,12 @@ export default {
 
     const s3Request = new Request(s3Url, request)
 
+    // Remove `user-agent` header for signing, will be re-added later.
+    const userAgent = s3Request.headers.get('user-agent')
+    s3Request.headers.delete('user-agent')
+
+    s3Request.headers.delete('authorization')
+    s3Request.headers.delete('connection')
     s3Request.headers.delete("accept-encoding")
     s3Request.headers.delete("cf-connecting-ip")
     s3Request.headers.delete("cf-ipcountry")
@@ -114,6 +120,8 @@ ${origSignature}
 
     const authHeader = await signer.authHeader()
     s3Request.headers.set("Authorization", authHeader)
+    // Re-add `user-agent` header since signing is done.
+    if (userAgent) s3Request.headers.set('user-agent', userAgent)
 
     return fetch(s3Request)
   },
