@@ -2,7 +2,6 @@ import { AwsV4Signer } from "aws4fetch"
 import { drizzle } from "drizzle-orm/d1"
 import * as schema from "./db/schema"
 
-const WORKER_HOSTNAME = "s3.yeagers.co"
 
 export default {
 	async fetch(request: Request, env: Env, _ctx: ExecutionContext) {
@@ -13,7 +12,7 @@ export default {
 
 		// Get bucket name from request URL.
 		const requestUrl = new URL(request.url)
-		const bucketName = requestUrl.hostname.replace(`.${WORKER_HOSTNAME}`, "")
+		const bucketName = requestUrl.hostname.replace(`.${env.HOSTNAME}`, "")
 
 		// Get info from database.
 		const bucket = await db.query.buckets.findFirst({
@@ -37,7 +36,7 @@ export default {
 
 		// Generate a new signature and change URL
 		let s3Url: string | undefined
-		if (requestUrl.hostname === WORKER_HOSTNAME) {
+		if (requestUrl.hostname === env.HOSTNAME) {
 			s3Url = bucket.endpoint
 		} else if (requestUrl.hostname.startsWith(`${bucketName}.`)) {
 			s3Url = bucket.endpoint.replace(/^https?:\/\//, `https://${bucket.name}.`)
