@@ -2,6 +2,7 @@ import { AwsV4Signer } from "aws4fetch"
 import { drizzle } from "drizzle-orm/d1"
 import * as schema from "./db/schema"
 
+const PROTOCOL_REGEX = /^https?:\/\//
 
 export default {
 	async fetch(request: Request, env: Env, _ctx: ExecutionContext) {
@@ -39,7 +40,7 @@ export default {
 		if (requestUrl.hostname === env.HOSTNAME) {
 			s3Url = bucket.endpoint
 		} else {
-			s3Url = bucket.endpoint.replace(/^https?:\/\//, `https://${bucket.name}.`)
+			s3Url = bucket.endpoint.replace(PROTOCOL_REGEX, `https://${bucket.name}.`)
 			requestUrl.pathname = requestUrl.pathname.replace("worker/", "")
 			s3Url = s3Url.concat(requestUrl.pathname, requestUrl.search)
 		}
