@@ -94,10 +94,13 @@ export default {
     })
 
     // Make sure the original request is signed correctly
-    if (
-      request.headers.get("authorization") !== (await origSigner.authHeader())
-    ) {
-      console.warn("Invalid authorization signature")
+    const origSignature = await origSigner.authHeader()
+    if (request.headers.get("authorization") !== origSignature) {
+      console.warn(`Invalid authorization signature:
+${request.headers.get("authorization")}
+does not equal
+${origSignature}
+`)
       return new Response("Invalid Authorization Signature", { status: 403 })
     }
 
