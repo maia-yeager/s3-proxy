@@ -7,9 +7,6 @@
   "name": "s3-proxy",
   "main": "src/index.ts",
   "compatibility_date": "2025-06-20",
-  "assets": {
-    "directory": "./public"
-  },
   "d1_databases": [
     {
       "binding": "DB",
