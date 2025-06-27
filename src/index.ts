@@ -12,11 +12,11 @@ export default {
 
 		// Get bucket name from request URL.
 		const requestUrl = new URL(request.url)
-		const bucketName = requestUrl.hostname.replace(`.${env.HOSTNAME}`, "")
 
 		// Get info from database.
 		const bucket = await db.query.buckets.findFirst({
-			where: (t, { eq }) => eq(t.name, bucketName),
+			where: (t, { eq }) =>
+				eq(t.name, requestUrl.hostname.replace(`.${env.HOSTNAME}`, "")),
 			columns: {
 				endpoint: true,
 				name: true,
