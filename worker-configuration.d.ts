@@ -4,7 +4,7 @@
 declare namespace Cloudflare {
   interface Env {
     DB: D1Database
-    HOSTNAME: string
+    WORKER_HOSTNAME: string
   }
 }
 interface Env extends Cloudflare.Env {}

@@ -17,7 +17,7 @@ export default {
     // Get info from database.
     const bucket = await db.query.buckets.findFirst({
       where: (t, { eq }) =>
-        eq(t.name, requestUrl.hostname.replace(`.${env.HOSTNAME}`, "")),
+        eq(t.name, requestUrl.hostname.replace(`.${env.WORKER_HOSTNAME}`, "")),
       columns: {
         endpoint: true,
         name: true,
@@ -37,7 +37,7 @@ export default {
 
     // Generate a new signature and change URL
     let s3Url: string
-    if (requestUrl.hostname === env.HOSTNAME) {
+    if (requestUrl.hostname === env.WORKER_HOSTNAME) {
       s3Url = bucket.endpoint
     } else {
       s3Url = bucket.endpoint.replace(PROTOCOL_REGEX, `https://${bucket.name}.`)
