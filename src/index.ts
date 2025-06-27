@@ -6,9 +6,6 @@ const PROTOCOL_REGEX = /^https?:\/\//
 
 export default {
   async fetch(request: Request, env: Env, _ctx: ExecutionContext) {
-    for (const header of request.headers) {
-      console.log(header[0], header[1])
-    }
     const db = drizzle(env.DB, { schema })
 
     // Get bucket name from request URL.
@@ -108,7 +105,6 @@ export default {
     })
 
     const authHeader = await signer.authHeader()
-    console.log(authHeader)
     s3Request.headers.set("Authorization", authHeader)
 
     return fetch(s3Request)
