@@ -24,11 +24,15 @@ export default {
       },
     })
     if (bucket === undefined) {
+      console.warn(
+        `Bucket not found in '${requestUrl.hostname}' using '.${env.WORKER_HOSTNAME}'`,
+      )
       return new Response("Bucket not found", { status: 404 })
     }
 
     // Make sure there is an Authorization header
     if (request.headers.get("authorization") === null) {
+      console.warn("Missing authorization header")
       return new Response("Forbidden", { status: 403 })
     }
 
@@ -93,6 +97,7 @@ export default {
     if (
       request.headers.get("authorization") !== (await origSigner.authHeader())
     ) {
+      console.warn("Invalid authorization signature")
       return new Response("Invalid Authorization Signature", { status: 403 })
     }
 
