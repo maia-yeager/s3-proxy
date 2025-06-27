@@ -1,6 +1,9 @@
 {
   "$schema": "node_modules/@biomejs/biome/configuration_schema.json",
   // Global configuration.
+  "formatter": {
+    "useEditorconfig": true
+  },
   "linter": {
     "rules": {
       "correctness": {
