@@ -35,18 +35,15 @@ export default {
 		}
 
 		// Generate a new signature and change URL
-		let s3Url: string | undefined
+		let s3Url: string
 		if (requestUrl.hostname === env.HOSTNAME) {
 			s3Url = bucket.endpoint
-		} else if (requestUrl.hostname.startsWith(`${bucketName}.`)) {
+		} else {
 			s3Url = bucket.endpoint.replace(/^https?:\/\//, `https://${bucket.name}.`)
 			requestUrl.pathname = requestUrl.pathname.replace("worker/", "")
 			s3Url = s3Url.concat(requestUrl.pathname, requestUrl.search)
 		}
 
-		if (typeof s3Url !== "string") {
-			return new Response("Could not determine S3 URL", { status: 400 })
-		}
 		const s3Request = new Request(s3Url, request)
 
 		s3Request.headers.delete("accept-encoding")
