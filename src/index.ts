@@ -76,7 +76,7 @@ export default {
       // Set to true to add X-Amz-Security-Token after signing, defaults to true for iot
       appendSessionToken: undefined,
       // Set to true to force all headers to be signed instead of the defaults
-      allHeaders: undefined,
+      allHeaders: true,
       // Set to true to only encode %2F once (usually only needed for testing)
       singleEncode: undefined,
     } satisfies Partial<ConstructorParameters<typeof AwsV4Signer>[0]>
