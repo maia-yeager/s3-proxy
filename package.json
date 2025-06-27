@@ -1,32 +1,32 @@
 {
-	"name": "s3-proxy",
-	"version": "1.0.0",
-	"private": true,
-	"scripts": {
-		"deploy": "wrangler deploy",
-		"dev": "wrangler dev",
-		"start": "wrangler dev",
-		"cf-typegen": "wrangler types"
-	},
-	"devDependencies": {
-		"@biomejs/biome": "2.0.5",
-		"@types/node": "^24.0.4",
-		"drizzle-kit": "^0.31.3",
-		"tsx": "^4.20.3",
-		"typescript": "^5.5.2",
-		"wrangler": "^4.20.5"
-	},
-	"dependencies": {
-		"aws4fetch": "^1.0.20",
-		"dotenv": "^16.5.0",
-		"drizzle-orm": "^0.44.2"
-	},
-	"pnpm": {
-		"onlyBuiltDependencies": [
-			"@biomejs/biome",
-			"esbuild",
-			"sharp",
-			"workerd"
-		]
-	}
+  "name": "s3-proxy",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev",
+    "start": "wrangler dev",
+    "cf-typegen": "wrangler types"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.0.5",
+    "@types/node": "^24.0.4",
+    "drizzle-kit": "^0.31.3",
+    "tsx": "^4.20.3",
+    "typescript": "^5.5.2",
+    "wrangler": "^4.20.5"
+  },
+  "dependencies": {
+    "aws4fetch": "^1.0.20",
+    "dotenv": "^16.5.0",
+    "drizzle-orm": "^0.44.2"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@biomejs/biome",
+      "esbuild",
+      "sharp",
+      "workerd"
+    ]
+  }
 }
