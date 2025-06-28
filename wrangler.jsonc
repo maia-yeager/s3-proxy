@@ -21,6 +21,10 @@
    * Docs: https://developers.cloudflare.com/workers/wrangler/configuration/#routes
    */
   "routes": [
+    {
+      "pattern": "yeagers.download",
+      "custom_domain": true
+    },
     // Per Cloudflare's security team, it's perfectly fine to have Zone ID
     // information publicly available.
     // https://github.com/cloudflare/wrangler-legacy/issues/209#issuecomment-541654484
