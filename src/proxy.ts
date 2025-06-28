@@ -1,3 +1,4 @@
+import { env } from "cloudflare:workers"
 import { AwsV4Signer } from "aws4fetch"
 import { z } from "zod/v4"
 import { kvSchema } from "./schema"
@@ -15,7 +16,7 @@ const HEADERS_TO_REMOVE = new Set([
   "x-real-ip",
 ])
 
-export async function proxy(url: URL, request: Request, env: Env) {
+export async function proxy(url: URL, request: Request) {
   // Get bucket info using the left-most subdomain name.
   const bucketName = url.hostname.replace(`.${env.WORKER_HOSTNAME}`, "")
   const result = kvSchema.safeParse(await env.KV.get(bucketName))
