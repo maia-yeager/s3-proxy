@@ -35,7 +35,10 @@
    * Environment Variables
    * https://developers.cloudflare.com/workers/wrangler/configuration/#environment-variables
    */
-  "vars": { "WORKER_HOSTNAME": "yeagers.download" }
+  "vars": {
+    "WORKER_HOSTNAME": "yeagers.download",
+    "WORKER_PREFIX": "worker"
+  }
   /**
    * Note: Use secrets to store sensitive data.
    * https://developers.cloudflare.com/workers/configuration/secrets/

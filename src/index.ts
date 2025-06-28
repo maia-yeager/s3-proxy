@@ -63,7 +63,10 @@ export default {
       s3Url = bucket.endpoint
     } else {
       s3Url = bucket.endpoint.replace(PROTOCOL_REGEX, `https://${bucket.name}.`)
-      requestUrl.pathname = requestUrl.pathname.replace("worker/", "")
+      requestUrl.pathname = requestUrl.pathname.replace(
+        `${env.WORKER_PREFIX}/`,
+        "",
+      )
       s3Url = s3Url.concat(requestUrl.pathname, requestUrl.search)
     }
 
