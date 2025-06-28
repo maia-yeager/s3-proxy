@@ -16,7 +16,6 @@ const SIGNED_HEADER_REGEX = /SignedHeaders=([^,]+),/i
 const HEADERS_TO_REMOVE = new Set([
   "authorization",
   "connection",
-  "accept-encoding",
   "cf-connecting-ip",
   "cf-ipcountry",
   "cf-ray",
