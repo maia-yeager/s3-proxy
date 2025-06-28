@@ -1,8 +1,7 @@
-import { env } from "cloudflare:workers"
 import { proxy } from "./proxy"
 
 export default {
-  async fetch(request: Request) {
+  async fetch(request: Request, env: Env, _ctx: ExecutionContext) {
     const url = new URL(request.url)
 
     // Redirect empty path and search to admin page.
@@ -21,6 +20,6 @@ export default {
       return new Response("Not implemented", { status: 501 })
     }
     // S3 proxy.
-    return proxy(url, request)
+    return proxy(url, request, env)
   },
 }
