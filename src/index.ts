@@ -30,6 +30,7 @@ export default {
 
     // Redirect empty root request to admin.
     if (
+      request.method.toUpperCase() === "GET" &&
       url.hostname === env.WORKER_HOSTNAME &&
       url.pathname === "/" &&
       url.search === ""
