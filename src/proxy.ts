@@ -1,5 +1,5 @@
 import { AwsV4Signer } from "aws4fetch"
-import * as z from "zod/dist/types/v4"
+import { z } from "zod/dist/types/v4"
 import { kvSchema } from "./schema"
 
 const PROTOCOL_REGEX = /^https?:\/\//
