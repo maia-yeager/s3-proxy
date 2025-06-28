@@ -18,6 +18,33 @@
   "observability": {
     "enabled": true
   },
+
+  /**
+   * Workers.dev
+   * Docs: https://developers.cloudflare.com/workers/wrangler/configuration/#workersdev
+   */
+  "workers_dev": false,
+  /**
+   * Routes
+   * Docs: https://developers.cloudflare.com/workers/wrangler/configuration/#routes
+   */
+  "routes": [
+    // Per Cloudflare's security team, it's perfectly fine to have Zone ID
+    // information publicly available.
+    // https://github.com/cloudflare/wrangler-legacy/issues/209#issuecomment-541654484
+    {
+      "pattern": "yeagers.download/",
+      "zone_id": "355d9f3ed27a2200dd2ac3664acc4dfc"
+    },
+    {
+      "pattern": "*.yeagers.download/",
+      "zone_id": "355d9f3ed27a2200dd2ac3664acc4dfc"
+    },
+    {
+      "pattern": "*.yeagers.download/~/*",
+      "zone_id": "355d9f3ed27a2200dd2ac3664acc4dfc"
+    }
+  ],
   /**
    * Smart Placement
    * Docs: https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement
