@@ -3,6 +3,7 @@ import { drizzle } from "drizzle-orm/d1"
 import * as schema from "./db/schema"
 
 const PROTOCOL_REGEX = /^https?:\/\//
+const SIGNED_HEADER_REGEX = /SignedHeaders=([^,]+),/i
 const HEADERS_TO_REMOVE = new Set([
   "authorization",
   "connection",
@@ -13,17 +14,6 @@ const HEADERS_TO_REMOVE = new Set([
   "cf-visitor",
   "x-forwarded-proto",
   "x-real-ip",
-])
-const HEADERS_TO_SIGN = new Set([
-  "amz-sdk-invocation-id",
-  "amz-sdk-request",
-  "content-length",
-  "content-type",
-  "host",
-  "x-amz-acl",
-  "x-amz-content-sha256",
-  "x-amz-date",
-  "x-amz-user-agent",
 ])
 
 export default {
@@ -52,13 +42,22 @@ export default {
       return new Response("Bucket not found", { status: 404 })
     }
 
-    // Make sure there is an Authorization header
-    if (request.headers.get("authorization") === null) {
+    // Make sure there is an Authorization header.
+    const origAuthHeader = request.headers.get("authorization")
+    if (origAuthHeader === null) {
       console.warn("Missing authorization header")
       return new Response("Forbidden", { status: 403 })
     }
+    // Determine which headers need to be signed.
+    const signedHeaders = new Set(
+      origAuthHeader.match(SIGNED_HEADER_REGEX)?.[1].split(";"),
+    )
+    if (signedHeaders.size === 0) {
+      console.warn("No signed headers")
+      return new Response("Forbidden", { status: 403 })
+    }
 
-    // Generate a new signature and change URL
+    // Determine the URL to proxy the request to.
     let s3Url: string
     if (requestUrl.hostname === env.WORKER_HOSTNAME) {
       s3Url = bucket.endpoint
@@ -70,17 +69,17 @@ export default {
 
     // Clone request and make the necessary edits.
     const s3Request = new Request(s3Url, request)
-
-    // Manage clone request headers.
     for (const header of HEADERS_TO_REMOVE) {
       s3Request.headers.delete(header)
     }
-    const headersToReApply = new Map<string, string>()
+
+    // Determine headers to pop and later re-apply.
+    const headersToReApply = new Headers()
     for (const [header, value] of s3Request.headers) {
-      if (HEADERS_TO_SIGN.has(header)) continue
+      if (signedHeaders.has(header)) continue
       headersToReApply.set(header, value)
     }
-    for (const [header] of headersToReApply) {
+    for (const header of headersToReApply.keys()) {
       s3Request.headers.delete(header)
     }
 
