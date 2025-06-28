@@ -2,11 +2,12 @@
   "name": "s3-proxy",
   "version": "1.0.0",
   "private": true,
+  "type": "module",
   "scripts": {
-    "deploy": "wrangler deploy",
-    "dev": "wrangler dev",
-    "start": "wrangler dev",
-    "cf-typegen": "wrangler types"
+    "build": "vite build",
+    "deploy": "npm run build && wrangler deploy",
+    "dev": "vite dev",
+    "preview": "npm run build && vite preview"
   },
   "devDependencies": {
     "@biomejs/biome": "2.0.5",
