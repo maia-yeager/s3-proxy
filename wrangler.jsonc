@@ -29,7 +29,7 @@
     // information publicly available.
     // https://github.com/cloudflare/wrangler-legacy/issues/209#issuecomment-541654484
     {
-      "pattern": "yeagers.download/*",
+      "pattern": "yeagers.download/",
       "zone_id": "355d9f3ed27a2200dd2ac3664acc4dfc"
     },
     {
