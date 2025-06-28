@@ -3,6 +3,17 @@ import { drizzle } from "drizzle-orm/d1"
 import * as schema from "./db/schema"
 
 const PROTOCOL_REGEX = /^https?:\/\//
+const HEADERS_TO_REMOVE = new Set([
+  "authorization",
+  "connection",
+  "accept-encoding",
+  "cf-connecting-ip",
+  "cf-ipcountry",
+  "cf-ray",
+  "cf-visitor",
+  "x-forwarded-proto",
+  "x-real-ip",
+])
 const HEADERS_TO_SIGN = new Set([
   "amz-sdk-invocation-id",
   "amz-sdk-request",
@@ -60,17 +71,10 @@ export default {
     // Clone request and make the necessary edits.
     const s3Request = new Request(s3Url, request)
 
-    // Remove unused headers.
-    s3Request.headers.delete("authorization")
-    s3Request.headers.delete("connection")
-    s3Request.headers.delete("accept-encoding")
-    s3Request.headers.delete("cf-connecting-ip")
-    s3Request.headers.delete("cf-ipcountry")
-    s3Request.headers.delete("cf-ray")
-    s3Request.headers.delete("cf-visitor")
-    s3Request.headers.delete("x-forwarded-proto")
-    s3Request.headers.delete("x-real-ip")
-
+    // Manage clone request headers.
+    for (const header of HEADERS_TO_REMOVE) {
+      s3Request.headers.delete(header)
+    }
     const headersToReApply = new Map<string, string>()
     for (const [header, value] of s3Request.headers) {
       if (HEADERS_TO_SIGN.has(header)) continue
