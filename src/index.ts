@@ -10,12 +10,12 @@ export default {
       url.pathname === "/" &&
       url.search === ""
     ) {
-      return Response.redirect(`https://${env.WORKER_HOSTNAME}/admin`, 307)
+      return Response.redirect(`https://${env.WORKER_HOSTNAME}/admin/`, 307)
     }
     // Admin management page.
     if (
       url.hostname === env.WORKER_HOSTNAME &&
-      url.pathname.startsWith("admin/")
+      url.pathname.startsWith("admin")
     ) {
       return new Response("Not implemented", { status: 501 })
     }
