@@ -109,6 +109,7 @@ export default {
       singleEncode: undefined,
     } satisfies Partial<ConstructorParameters<typeof AwsV4Signer>[0]>
 
+    // Make sure the original request is signed correctly.
     const origSigner = new AwsV4Signer({
       ...sharedSignerConfig,
       // Required, the AWS endpoint to sign
@@ -120,8 +121,6 @@ export default {
       // Defaults to now
       datetime: request.headers.get("x-amz-date") ?? undefined,
     })
-
-    // Make sure the original request is signed correctly
     const origSignature = await origSigner.authHeader()
     if (request.headers.get("authorization") !== origSignature) {
       console.warn(`Invalid authorization signature:
@@ -132,6 +131,7 @@ ${origSignature}
       return new Response("Invalid Authorization Signature", { status: 403 })
     }
 
+    // Re-sign the request.
     const signer = new AwsV4Signer({
       ...sharedSignerConfig,
       url: s3Url,
@@ -140,10 +140,10 @@ ${origSignature}
       datetime: s3Request.headers.get("x-amz-date") ?? undefined, // defaults to now. to override, use the form '20150830T123600Z'
     })
 
+    // Finalize headers.
     for (const [header, value] of headersToReApply) {
       s3Request.headers.set(header, value)
     }
-
     const authHeader = await signer.authHeader()
     s3Request.headers.set("Authorization", authHeader)
 
