@@ -37,7 +37,7 @@
    */
   "vars": {
     "WORKER_HOSTNAME": "yeagers.download",
-    "WORKER_PREFIX": "worker"
+    "WORKER_PREFIX": "~"
   }
   /**
    * Note: Use secrets to store sensitive data.
