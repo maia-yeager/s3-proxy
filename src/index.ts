@@ -11,7 +11,8 @@ const HEADERS_TO_SIGN = new Set([
   "host",
   "x-amz-acl",
   "x-amz-content-sha256",
-  "x-amz-date;x-amz-user-agent",
+  "x-amz-date",
+  "x-amz-user-agent",
 ])
 
 export default {
