@@ -1,4 +1,4 @@
-import * as z from "zod/dist/types/v4"
+import { z } from "zod/v4"
 
 export const kvSchema = z.preprocess(
   (value) => (typeof value === "string" ? JSON.parse(value) : null),
