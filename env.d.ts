@@ -1,6 +1,6 @@
 declare namespace Cloudflare {
   interface Env {
-    DB: D1Database
+    KV: KVNamespace
     WORKER_HOSTNAME: string
     WORKER_PREFIX: string
   }

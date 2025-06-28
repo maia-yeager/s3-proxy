@@ -1,6 +1,15 @@
 import { AwsV4Signer } from "aws4fetch"
-import { drizzle } from "drizzle-orm/d1"
-import * as schema from "./db/schema"
+import * as z from "zod/v4"
+
+const KV_SCHEMA = z.preprocess(
+  (value) => (typeof value === "string" ? JSON.parse(value) : null),
+  z.object({
+    endpoint: z.url().min(1),
+    accessKeyId: z.string().min(1),
+    secretAccessKey: z.string().min(1),
+    region: z.string().min(1),
+  }),
+)
 
 const PROTOCOL_REGEX = /^https?:\/\//
 const SIGNED_HEADER_REGEX = /SignedHeaders=([^,]+),/i
@@ -18,29 +27,22 @@ const HEADERS_TO_REMOVE = new Set([
 
 export default {
   async fetch(request: Request, env: Env, _ctx: ExecutionContext) {
-    const db = drizzle(env.DB, { schema })
-
     // Get bucket name from request URL.
     const requestUrl = new URL(request.url)
 
-    // Get info from database.
-    const bucket = await db.query.buckets.findFirst({
-      where: (t, { eq }) =>
-        eq(t.name, requestUrl.hostname.replace(`.${env.WORKER_HOSTNAME}`, "")),
-      columns: {
-        endpoint: true,
-        name: true,
-        accessKeyId: true,
-        secretAccessKey: true,
-        region: true,
-      },
-    })
-    if (bucket === undefined) {
+    // Get bucket info using the left-most subdomain name.
+    const bucketName = requestUrl.hostname.replace(
+      `.${env.WORKER_HOSTNAME}`,
+      "",
+    )
+    const result = KV_SCHEMA.safeParse(await env.KV.get(bucketName))
+    if (result.error) {
       console.warn(
         `Bucket not found in '${requestUrl.hostname}' using '.${env.WORKER_HOSTNAME}'`,
       )
       return new Response("Bucket not found", { status: 404 })
     }
+    const bucket = result.data
 
     // Make sure there is an Authorization header.
     const origAuthHeader = request.headers.get("authorization")
@@ -62,7 +64,7 @@ export default {
     if (requestUrl.hostname === env.WORKER_HOSTNAME) {
       s3Url = bucket.endpoint
     } else {
-      s3Url = bucket.endpoint.replace(PROTOCOL_REGEX, `https://${bucket.name}.`)
+      s3Url = bucket.endpoint.replace(PROTOCOL_REGEX, `https://${bucketName}.`)
       requestUrl.pathname = requestUrl.pathname.replace(
         `${env.WORKER_PREFIX}/`,
         "",
