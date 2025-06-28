@@ -15,7 +15,7 @@ export default {
     // Admin management page.
     if (
       url.hostname === env.WORKER_HOSTNAME &&
-      url.pathname.startsWith("admin")
+      url.pathname.startsWith("/admin")
     ) {
       return new Response("Not implemented", { status: 501 })
     }
