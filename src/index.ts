@@ -37,8 +37,9 @@ export default {
     )
     const result = KV_SCHEMA.safeParse(await env.KV.get(bucketName))
     if (result.error) {
+      const { keys } = await env.KV.list()
       console.warn(
-        `Bucket not found in '${requestUrl.hostname}' using '.${env.WORKER_HOSTNAME}'`,
+        `Error parsing '${bucketName}' data: ${z.prettifyError(result.error)}\nAvailable keys: ${keys.join(", ")}`,
       )
       return new Response("Bucket not found", { status: 404 })
     }
