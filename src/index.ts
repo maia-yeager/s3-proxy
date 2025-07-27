@@ -50,7 +50,7 @@ export default {
       console.warn(
         `Error parsing '${bucketName}' data: ${z.prettifyError(result.error)}\nAvailable keys: ${keys.join(", ")}`,
       )
-      return new Response("Bucket not found", { status: 404 })
+      return new Response("Not found", { status: 404 })
     }
     const bucket = result.data
 
