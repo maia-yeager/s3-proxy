@@ -40,6 +40,10 @@ export default {
 
     // Get bucket info using the left-most subdomain name.
     const bucketName = url.hostname.replace(`.${env.WORKER_HOSTNAME}`, "")
+    if (bucketName === "") {
+      console.warn("No bucket specified via subdomain")
+      return new Response("Not found", { status: 404 })
+    }
     const result = BUCKET_SCHEMA.safeParse(await env.KV.get(bucketName))
     if (result.error) {
       const { keys } = await env.KV.list()
