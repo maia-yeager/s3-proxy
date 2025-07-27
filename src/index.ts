@@ -53,9 +53,8 @@ export default {
     // Parse bucket data.
     const result = BUCKET_SCHEMA.safeParse(kvData)
     if (result.error) {
-      const { keys } = await env.KV.list()
       console.warn(
-        `Error parsing '${bucketName}' data: ${z.prettifyError(result.error)}\nAvailable keys: ${keys.join(", ")}`,
+        `Error parsing '${bucketName}' data: ${z.prettifyError(result.error)}`,
       )
       return new Response("Server error", { status: 500 })
     }
