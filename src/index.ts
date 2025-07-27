@@ -38,19 +38,26 @@ export default {
       return Response.redirect(`https://${env.WORKER_HOSTNAME}/admin/`, 307)
     }
 
-    // Get bucket info using the left-most subdomain name.
+    // Parse bucket name from subdomain.
     const bucketName = url.hostname.replace(`.${env.WORKER_HOSTNAME}`, "")
     if (bucketName === "") {
       console.warn("No bucket specified via subdomain")
       return new Response("Not found", { status: 404 })
     }
-    const result = BUCKET_SCHEMA.safeParse(await env.KV.get(bucketName))
+    // Retrieve bucket data.
+    const kvData = await env.KV.get(bucketName)
+    if (kvData === null) {
+      console.warn("Specified bucket not found")
+      return new Response("Not found", { status: 404 })
+    }
+    // Parse bucket data.
+    const result = BUCKET_SCHEMA.safeParse(kvData)
     if (result.error) {
       const { keys } = await env.KV.list()
       console.warn(
         `Error parsing '${bucketName}' data: ${z.prettifyError(result.error)}\nAvailable keys: ${keys.join(", ")}`,
       )
-      return new Response("Not found", { status: 404 })
+      return new Response("Server error", { status: 500 })
     }
     const bucket = result.data
 
