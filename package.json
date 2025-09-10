@@ -13,7 +13,7 @@
     "@biomejs/biome": "2.0.5",
     "@cloudflare/vite-plugin": "^1.7.5",
     "typescript": "^5.5.2",
-    "vite": "^6.3.5",
+    "vite": "^6.3.6",
     "wrangler": "^4.20.5"
   },
   "dependencies": {
