@@ -40,7 +40,7 @@ export default {
 
     // Parse bucket name from subdomain.
     const bucketName = url.hostname.replace(`.${env.WORKER_HOSTNAME}`, "")
-    if (bucketName === "") {
+    if (bucketName === env.WORKER_HOSTNAME) {
       console.warn("No bucket specified via subdomain")
       return new Response("Not found", { status: 404 })
     }
