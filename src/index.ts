@@ -2,7 +2,7 @@ import { AwsV4Signer } from "aws4fetch"
 import { z } from "zod"
 
 const PROTOCOL_REGEX = /^https?:\/\//i
-const SIGNED_HEADER_REGEX = /SignedHeaders=([^,]+),/i
+const SIGNED_HEADER_REGEX = /SignedHeaders=([^,]+)/i
 const HEADERS_TO_REMOVE = new Set([
   "authorization",
   "connection",
