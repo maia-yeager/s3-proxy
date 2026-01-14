@@ -16,6 +16,7 @@ const HEADERS_TO_REMOVE = new Set([
 ])
 
 export default {
+  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: TODO: simplify
   async fetch(request, env) {
     const url = new URL(request.url)
 
