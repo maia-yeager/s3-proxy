@@ -1,5 +1,5 @@
 import { AwsV4Signer } from "aws4fetch"
-import { z } from "zod/v4"
+import { z } from "zod"
 
 const PROTOCOL_REGEX = /^https?:\/\//i
 const SIGNED_HEADER_REGEX = /SignedHeaders=([^,]+),/i

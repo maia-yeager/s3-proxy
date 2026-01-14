@@ -5,20 +5,32 @@
   "type": "module",
   "scripts": {
     "build": "vite build",
-    "deploy": "npm run build && wrangler deploy",
-    "dev": "vite dev",
-    "preview": "npm run build && vite preview"
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev",
+    "lint": "biome check --fix --unsafe",
+    "lint:ci": "biome ci --error-on-warnings",
+    "preview": "npm run build && vite preview",
+    "start": "wrangler dev",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage.enabled true",
+    "typecheck": "tsc --build --clean",
+    "typegen": "wrangler types --env-file .env.typegen"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.0.5",
-    "@cloudflare/vite-plugin": "^1.7.5",
-    "typescript": "^5.5.2",
-    "vite": "^6.4.1",
-    "wrangler": "^4.20.5"
+    "@biomejs/biome": "2.2.7",
+    "@cloudflare/vite-plugin": "^1.20.3",
+    "@cloudflare/vitest-pool-workers": "^0.12.3",
+    "@types/node": "^25.0.8",
+    "@vitest/coverage-istanbul": "^3.2.4",
+    "typescript": "^5.9.3",
+    "vite": "^7.3.1",
+    "vite-tsconfig-paths": "^6.0.4",
+    "vitest": "~3.2.4",
+    "wrangler": "^4.59.1"
   },
   "dependencies": {
     "aws4fetch": "^1.0.20",
-    "zod": "^3.25.67"
+    "zod": "^4.3.5"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
