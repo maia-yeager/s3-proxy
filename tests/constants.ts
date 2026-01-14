@@ -1,4 +1,4 @@
-import type { BUCKET_SCHEMA } from "@src/index"
+import type { bucketDataSchema } from "@src/schema"
 import type { z } from "zod"
 
 export const bucketName = "bucket"
@@ -10,4 +10,4 @@ export const bucketData = {
   secretAccessKey:
     "8866e0a0d14e0db4649425f1cae7d9e73c08699943f0b532b609fa53e6b40d41",
   region: "auto",
-} satisfies z.infer<typeof BUCKET_SCHEMA>
+} satisfies z.infer<typeof bucketDataSchema>
