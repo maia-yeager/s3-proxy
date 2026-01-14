@@ -39,7 +39,7 @@ export default {
     // Retrieve bucket data.
     const kvData = await env.KV.get(bucketName)
     if (kvData === null) {
-      console.warn("Specified bucket not found")
+      console.warn(`Bucket not found: ${bucketName}`)
       return new Response("Not found", { status: 404 })
     }
     // Parse bucket data.
