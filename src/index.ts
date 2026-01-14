@@ -1,8 +1,9 @@
 import { AwsV4Signer } from "aws4fetch"
-import { z } from "zod/v4"
+import { z } from "zod"
+import { bucketDataSchema } from "./schema"
 
 const PROTOCOL_REGEX = /^https?:\/\//i
-const SIGNED_HEADER_REGEX = /SignedHeaders=([^,]+),/i
+const SIGNED_HEADER_REGEX = /SignedHeaders=([^,]+)/i
 const HEADERS_TO_REMOVE = new Set([
   "authorization",
   "connection",
@@ -14,18 +15,9 @@ const HEADERS_TO_REMOVE = new Set([
   "x-real-ip",
 ])
 
-const BUCKET_SCHEMA = z.preprocess(
-  (value) => (typeof value === "string" ? JSON.parse(value) : null),
-  z.object({
-    endpoint: z.url().min(1),
-    accessKeyId: z.string().min(1),
-    secretAccessKey: z.string().min(1),
-    region: z.string().min(1),
-  }),
-)
-
 export default {
-  async fetch(request, env: Env) {
+  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: TODO: simplify
+  async fetch(request, env) {
     const url = new URL(request.url)
 
     // Redirect empty root request to admin.
@@ -47,11 +39,11 @@ export default {
     // Retrieve bucket data.
     const kvData = await env.KV.get(bucketName)
     if (kvData === null) {
-      console.warn("Specified bucket not found")
+      console.warn(`Bucket not found: ${bucketName}`)
       return new Response("Not found", { status: 404 })
     }
     // Parse bucket data.
-    const result = BUCKET_SCHEMA.safeParse(kvData)
+    const result = bucketDataSchema.safeParse(kvData)
     if (result.error) {
       console.warn(
         `Error parsing '${bucketName}' data: ${z.prettifyError(result.error)}`,
@@ -72,7 +64,7 @@ export default {
     )
     if (signedHeaders.size === 0) {
       console.warn("No signed headers")
-      return new Response("Forbidden", { status: 403 })
+      return new Response("Bad request", { status: 400 })
     }
 
     // Determine the URL to proxy the request to.

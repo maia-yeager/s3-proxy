@@ -1,70 +1,86 @@
 {
   "$schema": "node_modules/@biomejs/biome/configuration_schema.json",
   // Global configuration.
-  "formatter": {
-    "useEditorconfig": true
-  },
+  "formatter": { "useEditorconfig": true },
   "linter": {
+    "domains": { "project": "recommended" },
     "rules": {
-      "correctness": {
-        // Still required for now.
-        "noNodejsModules": "off",
-        // No support for TypeScript aliases yet.
-        "noUndeclaredDependencies": "off",
-        // Since we're using a bundler, this is unnecessary.
-        "useImportExtensions": "off"
+      "complexity": {
+        "noExcessiveCognitiveComplexity": "on",
+        "noExcessiveNestedTestSuites": "on",
+        "noForEach": "on",
+        "noImplicitCoercions": "on",
+        "noUselessStringConcat": "on",
+        "noVoid": "on",
+        "useSimplifiedLogicExpression": "on",
+        "useWhile": "on"
       },
-      "nursery": {},
+      "correctness": {
+        "noGlobalDirnameFilename": "error",
+        "noNodejsModules": "error", // Not available without CF Node.js compat.
+        "noProcessGlobal": "error", // Not available without CF Node.js compat.
+        "useJsonImportAttributes": "on",
+        "useSingleJsDocAsterisk": "on"
+      },
       "performance": {
-        // Since we're using a bundler, this is unnecessary.
-        "noBarrelFile": "off",
-        // Since we're using a bundler, this is unnecessary.
-        "noReExportAll": "off",
-        // Helpful for some libraries, e.g. Node built-ins.
-        "noNamespaceImport": "off"
+        "noAwaitInLoops": "on",
+        "noDelete": "on",
+        "noDynamicNamespaceImportAccess": "on",
+        "noNamespaceImport": "on",
+        "useTopLevelRegex": "on"
       },
       "style": {
-        // Required for Remix.
-        "noDefaultExport": "off",
-        // Requires more boilerplate for no real readability benefit.
-        "noImplicitBoolean": "off",
-        // Requires more boilerplate for no real readability benefit.
-        "useBlockStatements": "off",
-        // Requires more boilerplate in some instances for no real readability
-        // benefit.
-        "useCollapsedElseIf": "off",
-        // Requires more boilerplate for no real readability benefit.
-        "useExplicitLengthCheck": "off",
-        // While `for...of` is more readable, it's sometimes substantially slower
-        // than an index-based loop.
-        "useForOf": "off",
-        // React often uses non-standard naming, e.g. in component properties.
-        "useNamingConvention": "off",
-        // Conflicts with some Remix route conventions.
-        "useFilenamingConvention": "off",
-        "noParameterAssign": "error",
-        "useAsConstAssertion": "error",
-        "useDefaultParameterLast": "error",
-        "useEnumInitializers": "error",
-        "useSelfClosingElements": "error",
-        "useSingleVarDeclarator": "error",
-        "noUnusedTemplateLiteral": "error",
-        "useNumberNamespace": "error",
-        "noInferrableTypes": "error",
-        "noUselessElse": "error"
+        "noCommonJs": "on",
+        "noDoneCallback": "on",
+        "noInferrableTypes": "on",
+        "noNamespace": "on",
+        "noNegationElse": "on",
+        "noParameterAssign": "on",
+        "noProcessEnv": "on",
+        "noShoutyConstants": "on",
+        "noSubstr": "on",
+        "noUnusedTemplateLiteral": "on",
+        "noUselessElse": "on",
+        "noYodaExpression": "on",
+        "useArrayLiterals": "on",
+        "useAsConstAssertion": "on",
+        "useAtIndex": "on",
+        "useConsistentBuiltinInstantiation": "on",
+        "useDefaultParameterLast": "on",
+        "useEnumInitializers": "on",
+        "useFilenamingConvention": "on",
+        "useGroupedAccessorPairs": "on",
+        "useNumberNamespace": "on",
+        "useNumericSeparators": "on",
+        "useObjectSpread": "on",
+        "useReadonlyClassProperties": "on",
+        "useShorthandAssign": "on",
+        "useSingleVarDeclarator": "on",
+        "useSymbolDescription": "on",
+        "useThrowNewError": "on",
+        "useTrimStartEnd": "on",
+        "useUnifiedTypeSignatures": "on"
       },
       "suspicious": {
-        // Async functions without `await` are still useful, since exceptions
-        // reject the promise instead of being synchronously thrown.
-        "useAwait": "off",
-        // We're using React.
-        "noReactSpecificProps": "off",
-        // Console logging is useful in production, too.
-        "noConsole": "off"
+        "noBitwiseOperators": "on", // Not required in this project.
+        "noCatchAssign": "on",
+        "noEvolvingTypes": "on",
+        "noVar": "on",
+        "useErrorMessage": "on",
+        "useGuardForIn": "on",
+        "useNumberToFixedDigitsArgument": "on",
+        "useStaticResponseMethods": "on",
+        "useStrictMode": "on",
+        "noFocusedTests": "on",
+        "noSkippedTests": "on"
       }
     }
   },
-  "assist": { "actions": { "source": { "organizeImports": "on" } } },
+  "assist": {
+    "actions": {
+      "source": { "organizeImports": "on" }
+    }
+  },
   // Project configuration.
   "vcs": {
     "enabled": true,
@@ -72,23 +88,28 @@
     "useIgnoreFile": true
   },
   // Language configuration.
-  "css": {
-    "formatter": {
-      "enabled": true
-    },
-    "linter": {
-      "enabled": true
-    },
-    "parser": {
-      "cssModules": true
-    }
-  },
   "javascript": {
-    "formatter": {
-      "semicolons": "asNeeded"
-    }
+    "formatter": { "semicolons": "asNeeded" }
   },
-  "json": {
-    "formatter": {}
-  }
+  "files": {
+    "ignoreUnknown": true,
+    "includes": ["**", "!worker-configuration.d.ts"]
+  },
+  "overrides": [
+    {
+      "includes": ["tsconfig*.json"],
+      "json": {
+        "parser": { "allowComments": true }
+      }
+    },
+    {
+      "includes": ["**/*.test.*"],
+      "linter": {
+        "rules": {
+          "style": { "useFilenamingConvention": "off" },
+          "suspicious": { "useErrorMessage": "off" }
+        }
+      }
+    }
+  ]
 }
