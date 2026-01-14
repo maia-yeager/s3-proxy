@@ -64,7 +64,7 @@ export default {
     )
     if (signedHeaders.size === 0) {
       console.warn("No signed headers")
-      return new Response("Forbidden", { status: 403 })
+      return new Response("Bad request", { status: 400 })
     }
 
     // Determine the URL to proxy the request to.
