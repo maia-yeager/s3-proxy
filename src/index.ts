@@ -16,7 +16,7 @@ const HEADERS_TO_REMOVE = new Set([
 ])
 
 export default {
-  async fetch(request, env: Env) {
+  async fetch(request, env) {
     const url = new URL(request.url)
 
     // Redirect empty root request to admin.
